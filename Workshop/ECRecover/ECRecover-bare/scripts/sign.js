@@ -2,7 +2,7 @@ const ethers = require('ethers');
 const providers = ethers.providers;
 const Wallet = ethers.Wallet;
 const utils = ethers.utils;
-const contractABI;
+const contractABI = require('../build/ECVerifier.json').abi;
 
 (async function () {
 
@@ -10,16 +10,22 @@ const contractABI;
 		throw new Error('Invalid arguments');
 	}
 
-	const provider = new providers.JsonRpcProvider('http://localhost:8545');
-
 	const privateKey = process.argv[2];
-	const wallet = new Wallet(privateKey, provider);
-
 	const message = process.argv[3];
-	const hashMsg = utils.solidityKeccak256(['string'], [message]);
-
 	const contractAddress = process.argv[4];
 
-	// TODO sign the bytes32 message and send it to the contract. Verify locally and remotely
+	const provider = new providers.JsonRpcProvider('http://localhost:8545');
+
+	const wallet = new Wallet(privateKey, provider);
+
+	const hashMsg = utils.solidityKeccak256(['string'], [message]);
+	var hashData = utils.arrayify(hashMsg);
+	const signature = await wallet.signMessage(hashData);
+
+	const verifierContract = new ethers.Contract(contractAddress, contractABI, wallet);
+	const result = await verifierContract.verify(hashMsg, signature);
+
+	console.log('local verify: ', utils.verifyMessage(hashData, signature));
+	console.log('remote verify: ', result);
 
 })()

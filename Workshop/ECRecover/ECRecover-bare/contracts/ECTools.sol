@@ -7,7 +7,7 @@ library ECTools {
    * @param hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
    * @param sig bytes signature
    */
-  function recover(bytes32 hash, bytes memory sig) public pure returns (address) {
+  function recover(bytes32 hash, bytes memory sig) private pure returns (address) {
     bytes32 r;
     bytes32 s;
     uint8 v;
@@ -37,7 +37,7 @@ library ECTools {
     }
   }
 
-  function toEthereumSignedMessage(bytes32 _msg) public pure returns (bytes32) {
+  function toEthereumSignedMessage(bytes32 _msg) private pure returns (bytes32) {
     bytes memory prefix = "\x19Ethereum Signed Message:\n32";
     return keccak256(abi.encodePacked(prefix, _msg));
   }
